@@ -1,0 +1,109 @@
+@import "tailwindcss";
+
+:root {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+    Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color-scheme: dark;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+@keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-15px); }
+    100% { transform: translateY(0px); }
+}
+.animate-float {
+    animation: float 6s ease-in-out infinite;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background: radial-gradient(circle at top left, #1e293b 0, #020617 40%, #000 90%);
+  color: #e5e7eb;
+}
+
+#app {
+  min-height: 100vh;
+}
+
+a {
+  text-decoration: none;
+}
+
+/* Reusable utility classes (used in App.vue) */
+
+.nav-link {
+  @apply text-xs font-medium text-slate-300 transition-colors hover:text-blue-300;
+}
+
+.section-kicker {
+  @apply text-[11px] font-semibold uppercase tracking-[0.2em] text-blue-300;
+}
+
+.section-title {
+  @apply text-xl font-semibold tracking-tight text-slate-50 sm:text-2xl;
+}
+
+.section-subtitle {
+  @apply text-xs leading-relaxed text-slate-300 sm:text-sm;
+}
+
+.card-outer {
+  @apply relative overflow-hidden rounded-2xl border border-slate-800/80 bg-slate-950/40 shadow-lg shadow-slate-950/40 backdrop-blur-sm transition duration-300 hover:-translate-y-1 hover:border-blue-400/70 hover:shadow-blue-900/70;
+  animation: fade-in-up 650ms ease-out both;
+}
+
+.card-inner {
+  @apply relative flex h-full flex-col justify-between p-4;
+}
+
+.input-field {
+  @apply w-full rounded-xl border border-slate-700/80 bg-slate-900/60 px-3 py-2 text-xs text-slate-100 outline-none transition focus:border-blue-400 focus:ring-1 focus:ring-blue-500/70;
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 700ms ease-out both;
+}
+
+.animate-fade-in-up-slow {
+  animation: fade-in-up 900ms ease-out both;
+}
+
+.animate-section-fade {
+  animation: section-fade 700ms ease-out both;
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.98);
+    filter: blur(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+@keyframes section-fade {
+  from {
+    opacity: 0;
+    transform: translateY(22px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
