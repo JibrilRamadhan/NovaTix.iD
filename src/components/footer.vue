@@ -18,10 +18,11 @@ const footerLinks = {
 };
 
 const socials = [
-  { icon: 'ph:instagram-logo-fill', href: '#', label: 'Instagram' },
-  { icon: 'ph:twitter-logo-fill', href: '#', label: 'Twitter' },
-  { icon: 'ph:linkedin-logo-fill', href: '#', label: 'LinkedIn' },
-  { icon: 'ph:github-logo-fill', href: '#', label: 'GitHub' },
+  { icon: 'ph:instagram-logo-fill', href: 'https://www.instagram.com/novatix_id?igsh=MTN1amg4ZzJudGZ5dw==', label: 'Instagram' },
+  // { icon: 'ph:twitter-logo-fill', href: '#', label: 'Twitter' },
+  // { icon: 'ph:linkedin-logo-fill', href: '#', label: 'LinkedIn' },
+  // { icon: 'ph:github-logo-fill', href: '#', label: 'GitHub' },
+  { icon: 'ph:whatsapp-logo-fill', href: 'https://wa.me/6281330659888?text=Halo%20Novatix!%20Saya%20tertarik%20dengan%20layanan%20Anda', label: 'WhatsApp' },
 ];
 </script>
 
@@ -98,7 +99,7 @@ const socials = [
               <div class="w-8 h-8 rounded-lg bg-indigo-500/10 border border-indigo-500/15 flex items-center justify-center flex-shrink-0 group-hover:bg-indigo-500/20 transition-colors">
                 <Icon icon="ph:envelope-simple" class="text-indigo-400 text-sm" />
               </div>
-              <span>support@novatix.id</span>
+              <span>novatix0702@gmail.com</span>
             </li>
             <li class="flex items-center gap-3 text-sm text-gray-400 group">
               <div class="w-8 h-8 rounded-lg bg-indigo-500/10 border border-indigo-500/15 flex items-center justify-center flex-shrink-0 group-hover:bg-indigo-500/20 transition-colors">
