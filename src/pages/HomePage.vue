@@ -2,6 +2,8 @@
 import Navbar from '../components/navbar.vue';
 import Footer from '../components/footer.vue';
 import TeamMembers from '../components/teamMembers.vue';
+import Marquee from '../components/Marquee.vue';
+import TestimonialCard from '../components/TestimonialCard.vue';
 import { Icon } from '@iconify/vue';
 import { supabase } from '../lib/supabase';
 import { useScrollReveal } from '../composables/useScrollReveal';
@@ -18,6 +20,25 @@ let observer = null;
 // Pricing data
 const pricingPlans = ref([])
 const pricingLoading = ref(true)
+const testimonials = ref([])
+
+const fetchTestimonials = async () => {
+  const { data } = await supabase
+    .from('testimonials')
+    .select('*, portfolios(live_url, title)') // Fetch live_url and title
+    .eq('is_visible', true)
+    .order('created_at', { ascending: false })
+    .limit(10) // Limit increased for marquee loop
+  
+  if (data) {
+    // Map data to include projectLink and projectTitle flattened
+    testimonials.value = data.map(t => ({
+        ...t,
+        projectLink: t.portfolios?.live_url || null,
+        projectTitle: t.portfolios?.title || null
+    }))
+  }
+}
 const services = [
   {
     icon: 'ph:code-bold',
@@ -172,6 +193,7 @@ onMounted(() => {
 
   fetchFeaturedPortfolios()
   fetchPricing()
+  fetchTestimonials()
 });
 
 onUnmounted(() => {
@@ -485,9 +507,10 @@ onUnmounted(() => {
     </section>
 
     <!-- ═══════════════════════════════════════════ -->
+
     <!-- SECTION: PRICELIST                          -->
     <!-- ═══════════════════════════════════════════ -->
-    <section id="pricing" class="relative py-28 px-6 md:px-12 overflow-hidden">
+    <section v-if="pricingPlans.length > 0 || pricingLoading" id="pricing" class="relative py-28 px-6 md:px-12 overflow-hidden">
       <!-- Background effects -->
       <div class="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-indigo-600/5 rounded-full blur-[150px] pointer-events-none"></div>
 
@@ -571,6 +594,74 @@ onUnmounted(() => {
     </section>
      
     <TeamMembers :members="teamMembers" />
+
+    <!-- ═══════════════════════════════════════════ -->
+    <!-- SECTION: TESTIMONIALS                       -->
+    <!-- ═══════════════════════════════════════════ -->
+    <section v-if="testimonials.length > 0" class="relative py-24 overflow-hidden border-t border-white/[0.05]">
+      <!-- Background glow -->
+      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-indigo-600/5 rounded-full blur-[100px] pointer-events-none"></div>
+
+      <div class="relative z-10">
+        <!-- Header -->
+        <div class="text-center mb-16 px-6">
+          <span data-reveal class="inline-block px-4 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-semibold tracking-widest uppercase mb-6">
+            Testimoni
+          </span>
+          <h2 data-reveal data-delay="100" class="text-3xl md:text-5xl font-bold text-white mb-4 tracking-tight">
+            Apa Kata <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-indigo-300">Mereka?</span>
+          </h2>
+        </div>
+
+        <!-- Case 1: Less than 5 items (Display Grid/Flex) -->
+        <div v-if="testimonials.length < 5" class="flex flex-wrap justify-center gap-6">
+            <TestimonialCard
+                v-for="item in testimonials"
+                :key="item.id"
+                :img="item.image_url"
+                :name="item.name"
+                :username="item.role"
+                :body="item.content"
+                :rating="item.rating"
+                :projectLink="item.projectLink"
+                :projectTitle="item.projectTitle"
+                class="w-full md:w-[350px]" 
+            />
+        </div>
+
+        <!-- Case 2: 5 or more items (Display Marquee) -->
+        <div v-else class="relative flex h-[500px] w-full flex-col items-center justify-center overflow-hidden">
+            <Marquee pauseOnHover class="[--duration:40s]">
+                <TestimonialCard
+                    v-for="item in testimonials"
+                    :key="item.id"
+                    :img="item.image_url"
+                    :name="item.name"
+                    :username="item.role"
+                    :body="item.content"
+                    :rating="item.rating"
+                />
+            </Marquee>
+            
+            <Marquee reverse pauseOnHover class="[--duration:40s] mt-6">
+                <TestimonialCard
+                    v-for="item in testimonials"
+                    :key="item.id + '-rev'"
+                    :img="item.image_url"
+                    :name="item.name"
+                    :username="item.role"
+                    :body="item.content"
+                    :rating="item.rating"
+                    :projectLink="item.projectLink"
+                    :projectTitle="item.projectTitle"
+                />
+            </Marquee>
+
+             <div class="pointer-events-none absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-black via-black/50 to-transparent z-10"></div>
+             <div class="pointer-events-none absolute inset-y-0 right-0 w-1/3 bg-gradient-to-l from-black via-black/50 to-transparent z-10"></div>
+        </div>
+      </div>
+    </section>
 
     <!-- ═══════════════════════════════════════════ -->
     <!-- SECTION: CONTACT / WHATSAPP CTA             -->

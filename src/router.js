@@ -50,6 +50,11 @@ const routes = [
                 path: 'pricing',
                 name: 'PricingManage',
                 component: () => import('./pages/PricingManage.vue')
+            },
+            {
+                path: 'testimonials',
+                name: 'TestimonialManage',
+                component: () => import('./pages/TestimonialManage.vue')
             }
         ]
     }

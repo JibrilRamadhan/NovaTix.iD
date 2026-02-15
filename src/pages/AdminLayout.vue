@@ -14,6 +14,7 @@ const navItems = [
   { name: 'Dashboard', icon: 'ph:squares-four-bold', route: '/admin' },
   { name: 'Portfolio', icon: 'ph:briefcase-bold', route: '/admin/portfolio' },
   { name: 'Pricing', icon: 'ph:coin-bold', route: '/admin/pricing' },
+  { name: 'Testimonial', icon: 'ph:quotes-fill', route: '/admin/testimonials' },
 ]
 
 onMounted(async () => {
