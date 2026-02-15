@@ -17,6 +17,10 @@ CREATE TABLE IF NOT EXISTS analytics_visits (
   device_type TEXT,
   referrer TEXT, -- Where they came from
   path TEXT, -- Current page
+  utm_source TEXT,
+  screen_resolution TEXT,
+  session_duration_seconds INTEGER,
+  scroll_depth_percent INTEGER,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
