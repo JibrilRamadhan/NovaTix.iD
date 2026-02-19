@@ -79,4 +79,4 @@ const options = {
   <div class="h-full w-full">
     <PolarArea :data="chartData" :options="options" :plugins="[whiteGlowPlugin]" />
   </div>
-</template>
+</template> 

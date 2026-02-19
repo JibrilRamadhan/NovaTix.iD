@@ -89,7 +89,7 @@ const teamMembers = [
   {
     name: 'Muhammad Farelino Hendika',
     role: 'Head of Marketing & Client Relations',
-    image: '/img/dika.jpeg',
+    image: '/img/dika2.jpeg',
     bio: 'Bertanggung jawab atas strategi media sosial, layanan pelanggan, dan memastikan setiap kebutuhan klien terpenuhi dengan solusi terbaik.',
     skills: ['Social Media Strategy', 'Customer Service', 'Sales', 'Public Relations'],
     social: { linkedin: '#', github: '#' }
