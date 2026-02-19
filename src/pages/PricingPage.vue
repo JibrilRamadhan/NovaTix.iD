@@ -4,74 +4,42 @@ import Footer from '../components/footer.vue';
 import { Icon } from '@iconify/vue';
 import { supabase } from '../lib/supabase';
 import { useScrollReveal } from '../composables/useScrollReveal';
-import { ref, onMounted, nextTick } from 'vue';
+import { useLanguage } from '../composables/useLanguage';
+import { ref, onMounted, nextTick, computed, reactive } from 'vue';
 
 const scrollReveal = useScrollReveal();
+const { lang, useT } = useLanguage();
+const t = useT('pricing');
+
 const pricingPlans = ref([]);
 const loading = ref(true);
 
-// FAQ Data
-const faqs = [
-  {
-    question: "Apakah ada biaya bulanan/tahunan?",
-    answer: "Tidak ada biaya bulanan untuk jasa pembuatan. Namun, Anda perlu memperpanjang Domain & Hosting setiap tahun (mulai tahun ke-2). Kami akan membantu mengingatkan Anda.",
-    isOpen: false
-  },
-  {
-    question: "Berapa lama proses pembuatan website?",
-    answer: "Tergantung kompleksitas. Untuk Landing Page biasanya 3-5 hari kerja. Untuk Company Profile 1-2 minggu. Toko Online atau Custom Web bisa 3-4 minggu.",
-    isOpen: false
-  },
-  {
-    question: "Apakah saya mendapatkan akses penuh?",
-    answer: "Ya! Anda akan mendapatkan akses penuh ke CPanel/Hosting dan Dashboard Admin website Anda. Website ini 100% milik Anda.",
-    isOpen: false
-  },
-  {
-    question: "Apakah ada garansi jika ada error?",
-    answer: "Tentu. Kami memberikan garansi maintenance gratis selama 1 bulan setelah website jadi. Jika ada bug/error dari sisi kami, akan kami perbaiki gratis.",
-    isOpen: false
-  },
-  {
-    question: "Apa saja yang perlu saya siapkan?",
-    answer: "Anda cukup menyiapkan materi konten (teks, foto produk/jasa, logo, kontak). Jika belum ada logo atau copy-writing, kami bisa bantu buatkan (ada biaya tambahan).",
-    isOpen: false
-  }
+// Reactive FAQ with isOpen state
+const faqState = reactive([false, false, false, false, false]);
+
+const faqs = computed(() => 
+  (t.value.faqs || []).map((faq, i) => ({
+    ...faq,
+    isOpen: faqState[i]
+  }))
+);
+
+// Reactive benefits with static icons
+const benefitIcons = [
+  'ph:clock-afternoon-bold',
+  'ph:paint-brush-broad-bold',
+  'ph:device-mobile-camera-bold',
+  'ph:rocket-launch-bold',
+  'ph:lock-key-bold',
+  'ph:headset-bold',
 ];
 
-// Value Props
-const benefits = [
-  {
-    icon: 'ph:clock-afternoon-bold',
-    title: 'Pengerjaan Cepat',
-    desc: 'Deadline ketat? Tidak masalah. Kami bekerja efisien tanpa mengurangi kualitas.'
-  },
-  {
-    icon: 'ph:paint-brush-broad-bold',
-    title: 'Desain Premium',
-    desc: 'Tampilan website modern, unik, dan profesional yang mencerminkan brand Anda.'
-  },
-  {
-    icon: 'ph:device-mobile-camera-bold',
-    title: 'Mobile Friendly',
-    desc: 'Website tampil sempurna di semua perangkat (HP, Tablet, Laptop, PC).'
-  },
-  {
-    icon: 'ph:rocket-launch-bold',
-    title: 'SEO Optimized',
-    desc: 'Struktur website yang disukai Google agar mudah ditemukan calon pelanggan.'
-  },
-  {
-    icon: 'ph:lock-key-bold',
-    title: 'Keamanan Terjamin',
-    desc: 'Dilengkapi SSL (HTTPS) dan proteksi dasar untuk mencegah serangan cyber.'
-  },
-  {
-    icon: 'ph:headset-bold',
-    title: 'Support Ramah',
-    desc: 'Bingung kelola website? Tim kami siap membantu kapanpun Anda butuh.'
-  }
-];
+const benefits = computed(() => 
+  (t.value.benefits || []).map((b, i) => ({
+    ...b,
+    icon: benefitIcons[i]
+  }))
+);
 
 const fetchPricing = async () => {
     try {
@@ -98,7 +66,7 @@ const fetchPricing = async () => {
 }
 
 const toggleFaq = (index) => {
-    faqs[index].isOpen = !faqs[index].isOpen;
+    faqState[index] = !faqState[index];
 }
 
 onMounted(() => {
@@ -121,16 +89,22 @@ onMounted(() => {
             <div class="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-[#0a0a0a] to-transparent pointer-events-none z-20"></div>
 
             <div class="relative z-10 max-w-4xl mx-auto">
-                <span data-reveal class="inline-block px-4 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-semibold tracking-widest uppercase mb-6">
-                    Penawaran Spesial
-                </span>
-                <h1 data-reveal data-delay="100" class="text-4xl md:text-6xl font-bold mb-6 tracking-tight">
-                    Investasi Cerdas untuk <br />
-                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">Masa Depan Digital</span>
-                </h1>
-                <p data-reveal data-delay="200" class="text-gray-400 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed">
-                    Pilih paket yang sesuai dengan kebutuhan bisnis Anda. Transparan, tanpa biaya tersembunyi, dan hasil memuaskan.
-                </p>
+                <Transition name="fade" mode="out-in">
+                  <span :key="t.heroLabel" data-reveal class="inline-block px-4 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-semibold tracking-widest uppercase mb-6">
+                      {{ t.heroLabel }}
+                  </span>
+                </Transition>
+                <Transition name="fade-up" mode="out-in">
+                  <h1 :key="t.heroTitle" data-reveal data-delay="100" class="text-4xl md:text-6xl font-bold mb-6 tracking-tight">
+                      {{ t.heroTitle }} <br />
+                      <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">{{ t.heroTitleHighlight }}</span>
+                  </h1>
+                </Transition>
+                <Transition name="fade-up" mode="out-in">
+                  <p :key="t.heroDesc" data-reveal data-delay="200" class="text-gray-400 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed">
+                      {{ t.heroDesc }}
+                  </p>
+                </Transition>
             </div>
         </section>
 
@@ -156,9 +130,11 @@ onMounted(() => {
                     <!-- Popular Badge -->
                     <div v-if="plan.is_popular" class="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-500"></div>
                     <div v-if="plan.is_popular" class="absolute top-4 right-4">
-                        <span class="px-3 py-1 rounded-full bg-indigo-500 text-white text-[10px] font-bold uppercase tracking-wider shadow-lg shadow-indigo-500/25 flex items-center gap-1">
-                            <Icon icon="ph:star-fill" /> Paling Laris
-                        </span>
+                        <Transition name="fade" mode="out-in">
+                          <span :key="t.badgeBestSeller" class="px-3 py-1 rounded-full bg-indigo-500 text-white text-[10px] font-bold uppercase tracking-wider shadow-lg shadow-indigo-500/25 flex items-center gap-1">
+                              <Icon icon="ph:star-fill" /> {{ t.badgeBestSeller }}
+                          </span>
+                        </Transition>
                     </div>
 
                     <div class="p-8 flex-1 flex flex-col">
@@ -194,7 +170,9 @@ onMounted(() => {
                                 ? 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-600/25' 
                                 : 'bg-white text-black hover:bg-gray-200'"
                         >
-                            <span>Pilih Paket</span>
+                            <Transition name="fade" mode="out-in">
+                              <span :key="t.btnSelectPlan">{{ t.btnSelectPlan }}</span>
+                            </Transition>
                             <Icon icon="ph:arrow-right-bold" />
                         </a>
                     </div>
@@ -204,9 +182,13 @@ onMounted(() => {
 
         <!-- Why Choose Us -->
         <section class="px-6 md:px-12 max-w-7xl mx-auto mb-32">
-            <div className="text-center mb-16">
-                <h2 data-reveal class="text-3xl md:text-4xl font-bold mb-4">Mengapa Memilih Kami?</h2>
-                <p data-reveal data-delay="100" class="text-gray-400">Kami tidak hanya membuat website, tapi membangun aset digital bisnis Anda.</p>
+            <div class="text-center mb-16">
+                <Transition name="fade-up" mode="out-in">
+                  <h2 :key="t.whyTitle" data-reveal class="text-3xl md:text-4xl font-bold mb-4">{{ t.whyTitle }}</h2>
+                </Transition>
+                <Transition name="fade-up" mode="out-in">
+                  <p :key="t.whyDesc" data-reveal data-delay="100" class="text-gray-400">{{ t.whyDesc }}</p>
+                </Transition>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -229,8 +211,12 @@ onMounted(() => {
         <!-- FAQ Section -->
         <section class="px-6 md:px-12 max-w-3xl mx-auto mb-32">
             <div class="text-center mb-12">
-                <h2 data-reveal class="text-3xl md:text-4xl font-bold mb-4">Sering Ditanyakan</h2>
-                <p data-reveal data-delay="100" class="text-gray-400">Jawaban untuk pertanyaan yang sering diajukan klien kami.</p>
+                <Transition name="fade-up" mode="out-in">
+                  <h2 :key="t.faqTitle" data-reveal class="text-3xl md:text-4xl font-bold mb-4">{{ t.faqTitle }}</h2>
+                </Transition>
+                <Transition name="fade-up" mode="out-in">
+                  <p :key="t.faqDesc" data-reveal data-delay="100" class="text-gray-400">{{ t.faqDesc }}</p>
+                </Transition>
             </div>
 
             <div class="space-y-4">
@@ -266,16 +252,22 @@ onMounted(() => {
         <section class="px-6 md:px-12 max-w-5xl mx-auto text-center pb-20">
             <div data-reveal class="relative p-12 rounded-3xl overflow-hidden bg-gradient-to-r from-indigo-900/40 to-purple-900/40 border border-indigo-500/20">
                 <div class="relative z-10">
-                    <h2 class="text-3xl md:text-5xl font-bold text-white mb-6">Siap Mengonlinekan Bisnis Anda?</h2>
-                    <p class="text-gray-300 text-lg mb-8 max-w-2xl mx-auto">
-                        Jangan biarkan kompetitor mendahului Anda. Miliki website profesional sekarang juga.
-                    </p>
+                    <Transition name="fade-up" mode="out-in">
+                      <h2 :key="t.ctaTitle" class="text-3xl md:text-5xl font-bold text-white mb-6">{{ t.ctaTitle }}</h2>
+                    </Transition>
+                    <Transition name="fade-up" mode="out-in">
+                      <p :key="t.ctaDesc" class="text-gray-300 text-lg mb-8 max-w-2xl mx-auto">
+                          {{ t.ctaDesc }}
+                      </p>
+                    </Transition>
                     <a 
                         href="https://wa.me/6281330659888?text=Halo%20Novatix!%20Saya%20ingin%20konsultasi%20website"
                         target="_blank"
                         class="inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-white text-indigo-900 font-bold hover:bg-indigo-50 transition-colors shadow-lg shadow-indigo-500/10"
                     >
-                        <span>Konsultasi Gratis</span>
+                        <Transition name="fade" mode="out-in">
+                          <span :key="t.ctaBtn">{{ t.ctaBtn }}</span>
+                        </Transition>
                         <Icon icon="ph:whatsapp-logo-bold" class="text-xl" />
                     </a>
                 </div>

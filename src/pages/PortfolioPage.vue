@@ -1,20 +1,26 @@
 <script setup>
-import { ref, onMounted, computed, onUnmounted } from 'vue'
+import { ref, onMounted, computed, onUnmounted, watch } from 'vue'
 import { supabase } from '../lib/supabase'
 import { Icon } from '@iconify/vue'
 import Navbar from '../components/navbar.vue'
 import Footer from '../components/footer.vue'
 import { useScrollReveal } from '../composables/useScrollReveal'
+import { useLanguage } from '../composables/useLanguage'
 
 useScrollReveal()
 
+const { lang, useT } = useLanguage()
+const t = useT('portfolio')
+
 const portfolios = ref([])
 const loading = ref(true)
-const activeCategory = ref('Semua')
-const categories = ref(['Semua'])
+const activeCategory = ref(computed(() => t.value.filterAll))
+const categories = ref([])
 
-// --- REVISI 1: TYPEWRITER EFFECT LOGIC ---
-const heroWords = ['Terbaik', 'Kreatif', 'Modern', 'Inovatif']
+// Computed reactive categories with translated "All"
+const displayCategories = computed(() => [t.value.filterAll, ...categories.value])
+
+// --- TYPEWRITER EFFECT LOGIC ---
 const displayedText = ref('')
 const isDeleting = ref(false)
 const loopNum = ref(0)
@@ -23,56 +29,61 @@ const deletingSpeed = ref(100)
 let typingTimeout = null
 
 const handleTypewriter = () => {
-  const i = loopNum.value % heroWords.length
-  const fullText = heroWords[i]
+  const words = t.value.typewriterWords || ['Best', 'Creative', 'Modern']
+  const i = loopNum.value % words.length
+  const fullText = words[i]
 
   if (isDeleting.value) {
-    // Sedang menghapus
     displayedText.value = fullText.substring(0, displayedText.value.length - 1)
   } else {
-    // Sedang mengetik
     displayedText.value = fullText.substring(0, displayedText.value.length + 1)
   }
 
-  // Atur kecepatan dinamis
   let typeSpeed = isDeleting.value ? deletingSpeed.value : typingSpeed.value
 
-  // Jika kata selesai diketik
   if (!isDeleting.value && displayedText.value === fullText) {
-    typeSpeed = 2000 // Tahan sebentar sebelum menghapus (pause)
+    typeSpeed = 2000
     isDeleting.value = true
   } 
-  // Jika kata selesai dihapus
   else if (isDeleting.value && displayedText.value === '') {
     isDeleting.value = false
     loopNum.value++
-    typeSpeed = 500 // Jedah sedikit sebelum mengetik kata baru
+    typeSpeed = 500
   }
 
   typingTimeout = setTimeout(handleTypewriter, typeSpeed)
 }
 
-// --- Tech Icon Mapper (Tetap sama) ---
+// Reset typewriter when language changes
+watch(lang, () => {
+  clearTimeout(typingTimeout)
+  displayedText.value = ''
+  isDeleting.value = false
+  loopNum.value = 0
+  handleTypewriter()
+})
+
+// --- Tech Icon Mapper ---
 const getTechIcon = (tech) => {
-  const t = tech.toLowerCase()
-  if (t.includes('vue')) return 'logos:vue'
-  if (t.includes('tailwind')) return 'logos:tailwindcss-icon'
-  if (t.includes('react')) return 'logos:react'
-  if (t.includes('node')) return 'logos:nodejs-icon'
-  if (t.includes('postgres')) return 'logos:postgresql'
-  if (t.includes('mysql')) return 'logos:mysql-icon'
-  if (t.includes('laravel')) return 'logos:laravel'
-  if (t.includes('php')) return 'logos:php'
-  if (t.includes('js') || t.includes('javascript')) return 'logos:javascript'
-  if (t.includes('ts') || t.includes('typescript')) return 'logos:typescript-icon'
-  if (t.includes('html')) return 'logos:html-5'
-  if (t.includes('css')) return 'logos:css-3'
-  if (t.includes('figma')) return 'logos:figma'
+  const techLower = tech.toLowerCase()
+  if (techLower.includes('vue')) return 'logos:vue'
+  if (techLower.includes('tailwind')) return 'logos:tailwindcss-icon'
+  if (techLower.includes('react')) return 'logos:react'
+  if (techLower.includes('node')) return 'logos:nodejs-icon'
+  if (techLower.includes('postgres')) return 'logos:postgresql'
+  if (techLower.includes('mysql')) return 'logos:mysql-icon'
+  if (techLower.includes('laravel')) return 'logos:laravel'
+  if (techLower.includes('php')) return 'logos:php'
+  if (techLower.includes('js') || techLower.includes('javascript')) return 'logos:javascript'
+  if (techLower.includes('ts') || techLower.includes('typescript')) return 'logos:typescript-icon'
+  if (techLower.includes('html')) return 'logos:html-5'
+  if (techLower.includes('css')) return 'logos:css-3'
+  if (techLower.includes('figma')) return 'logos:figma'
   return 'ph:code-bold'
 }
 
 onMounted(async () => {
-  handleTypewriter() // Mulai efek mengetik
+  handleTypewriter()
 
   try {
     const { data, error } = await supabase
@@ -85,7 +96,7 @@ onMounted(async () => {
     if (!error && data) {
       portfolios.value = data
       const cats = [...new Set(data.map(p => p.category))]
-      categories.value = ['Semua', ...cats]
+      categories.value = cats
     }
   } catch (e) {
     console.error('Failed to load portfolio:', e)
@@ -99,7 +110,7 @@ onUnmounted(() => {
 })
 
 const filteredPortfolios = computed(() => {
-  if (activeCategory.value === 'Semua') return portfolios.value
+  if (activeCategory.value === t.value.filterAll) return portfolios.value
   return portfolios.value.filter(p => p.category === activeCategory.value)
 })
 </script>
@@ -118,30 +129,36 @@ const filteredPortfolios = computed(() => {
 
       <div class="max-w-6xl mx-auto relative z-20 text-center">
         <span data-reveal class="inline-block px-4 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-semibold tracking-widest uppercase mb-6 shadow-[0_0_20px_rgba(99,102,241,0.1)]">
-          Portfolio
+          {{ t.heroLabel }}
         </span>
         
         <h1 data-reveal data-delay="100" class="text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-6 tracking-tight flex flex-col md:flex-row items-center justify-center gap-3">
-          <span>Karya</span>
+          <Transition name="fade" mode="out-in">
+            <span :key="t.heroTitle1">{{ t.heroTitle1 }}</span>
+          </Transition>
           
           <span class="inline-flex items-center text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400 min-w-[200px] md:min-w-[280px] h-[1.2em] justify-start">
             {{ displayedText }}
             <span class="ml-1 w-1 h-[1em] bg-indigo-400 animate-blink"></span>
           </span>
           
-          <span>Kami</span>
+          <Transition name="fade" mode="out-in">
+            <span :key="t.heroTitle2">{{ t.heroTitle2 }}</span>
+          </Transition>
         </h1>
         
-        <p data-reveal data-delay="200" class="text-gray-400 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed">
-          Koleksi project yang telah kami selesaikan dengan kualitas premium dan teknologi modern.
-        </p>
+        <Transition name="fade-up" mode="out-in">
+          <p :key="t.heroDesc" data-reveal data-delay="200" class="text-gray-400 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed">
+            {{ t.heroDesc }}
+          </p>
+        </Transition>
       </div>
     </section>
 
     <section class="px-6 md:px-12 max-w-6xl mx-auto mb-12 relative z-30 -mt-10">
       <div class="flex flex-wrap justify-center gap-3">
         <button
-          v-for="cat in categories"
+          v-for="cat in displayCategories"
           :key="cat"
           @click="activeCategory = cat"
           class="px-6 py-2.5 rounded-full text-sm font-medium border transition-all duration-300 backdrop-blur-md"
@@ -173,8 +190,12 @@ const filteredPortfolios = computed(() => {
     <section v-else-if="filteredPortfolios.length === 0" class="px-6 md:px-12 max-w-6xl mx-auto pb-28 text-center relative z-20">
       <div class="py-20 bg-white/[0.02] border border-white/[0.06] rounded-3xl backdrop-blur-sm">
         <Icon icon="ph:folder-open-duotone" class="text-6xl text-indigo-500/50 mx-auto mb-4" />
-        <h3 class="text-xl font-bold text-white mb-2">Belum ada project</h3>
-        <p class="text-gray-500">Portfolio sedang dalam proses penambahan. Stay tuned!</p>
+        <Transition name="fade" mode="out-in">
+          <h3 :key="t.emptyTitle" class="text-xl font-bold text-white mb-2">{{ t.emptyTitle }}</h3>
+        </Transition>
+        <Transition name="fade" mode="out-in">
+          <p :key="t.emptyDesc" class="text-gray-500">{{ t.emptyDesc }}</p>
+        </Transition>
       </div>
     </section>
 
@@ -189,13 +210,13 @@ const filteredPortfolios = computed(() => {
           :key="portfolio.id"
           :class="[
             'group bg-white/[0.02] border border-white/[0.06] rounded-3xl overflow-hidden hover:bg-white/[0.04] hover:border-indigo-500/30 hover:shadow-[0_8px_40px_-12px_rgba(99,102,241,0.3)] hover:-translate-y-2 transition-all duration-500 flex flex-col',
-            index === 0 && activeCategory === 'Semua' ? 'lg:col-span-2 lg:row-span-2' : ''
+            index === 0 && activeCategory === t.filterAll ? 'lg:col-span-2 lg:row-span-2' : ''
           ]"
         >
           <div 
             :class="[
               'relative bg-white/[0.03] overflow-hidden shrink-0',
-              index === 0 && activeCategory === 'Semua' ? 'h-64 lg:h-[400px]' : 'h-52'
+              index === 0 && activeCategory === t.filterAll ? 'h-64 lg:h-[400px]' : 'h-52'
             ]"
           >
             <img 
@@ -295,7 +316,6 @@ const filteredPortfolios = computed(() => {
   animation: float 10s ease-in-out infinite;
 }
 
-/* Cursor Blink Animation */
 @keyframes blink {
   0%, 100% { opacity: 1; }
   50% { opacity: 0; }

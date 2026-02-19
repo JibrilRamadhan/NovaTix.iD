@@ -1,27 +1,13 @@
 <script setup>
 import { Icon } from '@iconify/vue';
-const currentYear = new Date().getFullYear();
+import { useLanguage } from '../composables/useLanguage';
 
-const footerLinks = {
-  layanan: [
-    { label: 'Web Development', href: '#' },
-    { label: 'Joki Tugas IT', href: '#' },
-    { label: 'UI/UX Design', href: '#' },
-    { label: 'Bug Fixing', href: '#' },
-  ],
-  perusahaan: [
-    { label: 'Tentang Kami', href: '#' },
-    { label: 'Karir', href: '#' },
-    { label: 'Blog', href: '#' },
-    { label: 'Kebijakan Privasi', href: '#' },
-  ]
-};
+const { useT } = useLanguage();
+const t = useT('footer');
+const currentYear = new Date().getFullYear();
 
 const socials = [
   { icon: 'ph:instagram-logo-fill', href: 'https://www.instagram.com/novatix_id?igsh=MTN1amg4ZzJudGZ5dw==', label: 'Instagram' },
-  // { icon: 'ph:twitter-logo-fill', href: '#', label: 'Twitter' },
-  // { icon: 'ph:linkedin-logo-fill', href: '#', label: 'LinkedIn' },
-  // { icon: 'ph:github-logo-fill', href: '#', label: 'GitHub' },
   { icon: 'ph:whatsapp-logo-fill', href: 'https://wa.me/6281330659888?text=Halo%20Novatix!%20Saya%20tertarik%20dengan%20layanan%20Anda', label: 'WhatsApp' },
 ];
 </script>
@@ -50,9 +36,11 @@ const socials = [
               <span class="font-bold text-xl text-white tracking-tight">NovaTix<span class="text-indigo-400">.ID</span></span>
             </div>
           </div>
-          <p class="text-gray-400 text-sm leading-relaxed max-w-xs">
-            Solusi terbaik untuk pembuatan website profesional dan layanan joki coding terpercaya bagi mahasiswa & bisnis.
-          </p>
+          <Transition name="fade-up" mode="out-in">
+            <p :key="t.brandDesc" class="text-gray-400 text-sm leading-relaxed max-w-xs">
+              {{ t.brandDesc }}
+            </p>
+          </Transition>
           
           <!-- Social Links -->
           <div class="flex gap-2.5">
@@ -70,9 +58,11 @@ const socials = [
 
         <!-- Links Columns -->
         <div class="md:col-span-2 md:col-start-6">
-          <h4 class="text-xs font-bold text-white tracking-widest uppercase mb-5">Layanan</h4>
+          <Transition name="fade" mode="out-in">
+            <h4 :key="t.servicesHeading" class="text-xs font-bold text-white tracking-widest uppercase mb-5">{{ t.servicesHeading }}</h4>
+          </Transition>
           <ul class="space-y-3.5">
-            <li v-for="link in footerLinks.layanan" :key="link.label">
+            <li v-for="link in t.serviceLinks" :key="link.label">
               <a :href="link.href" class="text-sm text-gray-400 hover:text-indigo-300 transition-colors duration-200 hover:pl-1">
                 {{ link.label }}
               </a>
@@ -81,9 +71,11 @@ const socials = [
         </div>
 
         <div class="md:col-span-2">
-          <h4 class="text-xs font-bold text-white tracking-widest uppercase mb-5">Perusahaan</h4>
+          <Transition name="fade" mode="out-in">
+            <h4 :key="t.companyHeading" class="text-xs font-bold text-white tracking-widest uppercase mb-5">{{ t.companyHeading }}</h4>
+          </Transition>
           <ul class="space-y-3.5">
-            <li v-for="link in footerLinks.perusahaan" :key="link.label">
+            <li v-for="link in t.companyLinks" :key="link.label">
               <a :href="link.href" class="text-sm text-gray-400 hover:text-indigo-300 transition-colors duration-200 hover:pl-1">
                 {{ link.label }}
               </a>
@@ -93,7 +85,9 @@ const socials = [
 
         <!-- Contact Column -->
         <div class="md:col-span-3">
-          <h4 class="text-xs font-bold text-white tracking-widest uppercase mb-5">Hubungi Kami</h4>
+          <Transition name="fade" mode="out-in">
+            <h4 :key="t.contactHeading" class="text-xs font-bold text-white tracking-widest uppercase mb-5">{{ t.contactHeading }}</h4>
+          </Transition>
           <ul class="space-y-4">
             <li class="flex items-center gap-3 text-sm text-gray-400 group">
               <div class="w-8 h-8 rounded-lg bg-indigo-500/10 border border-indigo-500/15 flex items-center justify-center flex-shrink-0 group-hover:bg-indigo-500/20 transition-colors">
@@ -117,7 +111,7 @@ const socials = [
           &copy; {{ currentYear }} NovaTix.ID — All rights reserved.
         </p>
         <p class="text-xs text-gray-500">
-          Crafted with <span class="text-indigo-400">♥</span> by NovaTix Team
+          {{ t.bottomRight }}
         </p>
       </div>
 

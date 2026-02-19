@@ -7,8 +7,9 @@ import TestimonialCard from '../components/TestimonialCard.vue';
 import { Icon } from '@iconify/vue';
 import { supabase } from '../lib/supabase';
 import { useScrollReveal } from '../composables/useScrollReveal';
+import { useLanguage } from '../composables/useLanguage';
 
-import { ref, onMounted, onUnmounted, nextTick } from 'vue';
+import { ref, onMounted, onUnmounted, nextTick, computed } from 'vue';
 const sectionRef = ref(null);
 // Portfolio data
 const featuredPortfolios = ref([])
@@ -16,6 +17,76 @@ const portfolioLoading = ref(true)
 const isVisible = ref(false);
 const scrollReveal = useScrollReveal()
 let observer = null;
+
+// --- LANGUAGE STATE ---
+const { lang, useT } = useLanguage();
+const t = useT('home');
+const tTeam = useT('team');
+
+const services = computed(() => [
+  {
+    icon: 'ph:code-bold',
+    title: 'Quantum Web Dev',
+    desc: t.value.serviceWebDesc,
+    link: '#',
+    highlight: false
+  },
+  {
+    icon: 'ph:lightning-bold',
+    title: t.value.serviceJoki,
+    desc: t.value.serviceJokiDesc,
+    link: '#',
+    highlight: true
+  },
+  {
+    icon: 'ph:chats-circle-bold',
+    title: t.value.serviceConsult,
+    desc: t.value.serviceConsultDesc,
+    link: '#',
+    highlight: false
+  }
+]);
+
+const features = computed(() => [
+  { icon: 'ph:globe', title: 'Domain & Hosting', desc: t.value.featureDomain },
+  { icon: 'ph:rocket-launch', title: 'SEO Optimization', desc: t.value.featureSeo },
+  { icon: 'ph:shield-check', title: 'Security Audit', desc: t.value.featureSecurity },
+]);
+
+const teamMembers = computed(() => [
+  {
+    name: 'Ahmad Haikal Rizal',
+    role: 'Full Stack Engineer',
+    image: '/img/haikal.png',
+    bio: tTeam.value.bios?.[0] || '',
+    skills: ['Vue.js', 'React', 'Node.js', 'PostgreSQL'],
+    social: { linkedin: '#', github: '#' }
+  },
+  {
+    name: 'Jibril Ramadhan',
+    role: 'Frontend Engineer',
+    image: '/img/jib2.png',
+    bio: tTeam.value.bios?.[1] || '',
+    skills: ['Vue.js', 'React', 'Tailwind', 'TypeScript'],
+    social: { linkedin: '#', github: '#' }
+  },
+  {
+    name: 'Muhammad Farelino Hendika',
+    role: 'Head of Marketing & Client Relations',
+    image: '/img/dika2.jpeg',
+    bio: tTeam.value.bios?.[2] || '',
+    skills: ['Social Media Strategy', 'Customer Service', 'Sales', 'Public Relations'],
+    social: { linkedin: '#', github: '#' }
+  },
+  {
+    name: 'Niko Budi Prasetyo',
+    role: 'Backend Engineer',
+    image: '/img/niko.PNG',
+    bio: tTeam.value.bios?.[3] || '',
+    skills: ['Golang', 'Python', 'Docker', 'PHP', 'JavaScript'],
+    social: { linkedin: '#', github: '#' }
+  }
+]);
 
 // Pricing data
 const pricingPlans = ref([])
@@ -25,90 +96,24 @@ const testimonials = ref([])
 const fetchTestimonials = async () => {
   const { data } = await supabase
     .from('testimonials')
-    .select('*, portfolios(live_url, title)') // Fetch live_url and title
+    .select('*, portfolios(live_url, title)')
     .eq('is_visible', true)
     .order('created_at', { ascending: false })
-    .limit(10) // Limit increased for marquee loop
+    .limit(10)
   
   if (data) {
-    // Map data to include projectLink and projectTitle flattened
-    testimonials.value = data.map(t => ({
-        ...t,
-        projectLink: t.portfolios?.live_url || null,
-        projectTitle: t.portfolios?.title || null
+    testimonials.value = data.map(item => ({
+        ...item,
+        projectLink: item.portfolios?.live_url || null,
+        projectTitle: item.portfolios?.title || null
     }))
   }
 }
-const services = [
-  {
-    icon: 'ph:code-bold',
-    title: 'Quantum Web Dev',
-    desc: 'Pembuatan website responsif, modern, dan SEO friendly dengan teknologi terbaru.',
-    link: '#',
-    highlight: false
-  },
-  {
-    icon: 'ph:lightning-bold',
-    title: 'Joki Tugas Coding',
-    desc: 'Bantuan pengerjaan tugas kuliah, skripsi, atau error fixing. Cepat & Aman.',
-    link: '#',
-    highlight: true
-  },
-  {
-    icon: 'ph:chats-circle-bold',
-    title: 'Konsultasi Gratis',
-    desc: 'Bingung mulai dari mana? Diskusi gratis mengenai project sebelum memesan.',
-    link: '#',
-    highlight: false
-  }
-];
-
-const features = [
-  { icon: 'ph:globe', title: 'Domain & Hosting', desc: 'Bantuan setup server & deploy.' },
-  { icon: 'ph:rocket-launch', title: 'SEO Optimization', desc: 'Naikkan ranking Google bisnis Anda.' },
-  { icon: 'ph:shield-check', title: 'Security Audit', desc: 'Cek celah keamanan website.' },
-];
-
-const teamMembers = [
-  {
-    name: 'Ahmad Haikal Rizal',
-    role: 'Full Stack Engineer',
-    image: '/img/haikal.png',
-    bio: 'Menguasai pengembangan aplikasi web dari sisi depan hingga belakang dengan performa tinggi dan skalabilitas optimal menggunakan teknologi modern.',
-    skills: ['Vue.js', 'React', 'Node.js', 'PostgreSQL'],
-    social: { linkedin: '#', github: '#' }
-  },
-  {
-    name: 'Jibril Ramadhan',
-    role: 'Frontend Engineer',
-    image: '/img/jib2.png',
-    bio: 'Spesialis antarmuka pengguna dengan keahlian mendalam pada ekosistem Vue dan React. Fokus pada detail desain dan pengalaman pengguna yang interaktif.',
-    skills: ['Vue.js', 'React', 'Tailwind', 'TypeScript'],
-    social: { linkedin: '#', github: '#' }
-  },
-  {
-    name: 'Muhammad Farelino Hendika',
-    role: 'Head of Marketing & Client Relations',
-    image: '/img/dika2.jpeg',
-    bio: 'Bertanggung jawab atas strategi media sosial, layanan pelanggan, dan memastikan setiap kebutuhan klien terpenuhi dengan solusi terbaik.',
-    skills: ['Social Media Strategy', 'Customer Service', 'Sales', 'Public Relations'],
-    social: { linkedin: '#', github: '#' }
-  },
-  {
-    name: 'Niko Budi Prasetyo',
-    role: 'Backend Engineer',
-    image: '/img/niko.PNG',
-    bio: 'Arsitek sistem backend yang fokus pada keamanan, efisiensi database, dan logika server yang handal untuk mendukung aplikasi skala besar.',
-    skills: ['Golang', 'Python', 'Docker', 'PHP', 'JavaScript'],
-    social: { linkedin: '#', github: '#' }
-  }
-];
 
 const heroVideo = ref(null);
 
 const fetchFeaturedPortfolios = async () => {
   try {
-    // 1. Try fetching featured items
     let { data, error } = await supabase
       .from('portfolios')
       .select('*')
@@ -117,7 +122,6 @@ const fetchFeaturedPortfolios = async () => {
       .order('display_order', { ascending: true })
       .limit(6)
 
-    // 2. Fallback: If no featured items, fetch latest visible items
     if (!error && (!data || data.length === 0)) {
       console.log('No featured portfolios found, fetching fallback...')
       const fallback = await supabase
@@ -133,8 +137,6 @@ const fetchFeaturedPortfolios = async () => {
 
     if (!error) {
       featuredPortfolios.value = data || []
-      console.log('Loaded portfolios:', featuredPortfolios.value)
-      // Manually trigger observation for new elements
       nextTick(() => {
         if (scrollReveal && scrollReveal.observe) {
             scrollReveal.observe()
@@ -161,7 +163,6 @@ const fetchPricing = async () => {
 
     if (!error) {
         pricingPlans.value = data || []
-        // Manually trigger observation for new elements
         nextTick(() => {
             if (scrollReveal && scrollReveal.observe) {
                 scrollReveal.observe()
@@ -223,28 +224,33 @@ onUnmounted(() => {
 
       <div class="relative z-10 max-w-4xl mx-auto px-6 text-center flex flex-col items-center">
 
-        <h1 data-reveal class="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight text-white mb-6 leading-[1.1]">
-          Web Development <br class="hidden md:block" />
-          <span class="text-transparent bg-clip-text bg-gradient-to-b from-white to-indigo-800">
-            & Coding Solutions
-          </span>
-        </h1>
+        <div data-reveal class="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight text-white mb-6 leading-[1.1]">
+          <Transition name="fade-up" mode="out-in">
+            <h1 :key="t.heroTitle">
+              {{ t.heroTitle }} <br class="hidden md:block" />
+              <span class="text-transparent bg-clip-text bg-gradient-to-b from-white to-indigo-800">
+                & Coding Solutions
+              </span>
+            </h1>
+          </Transition>
+        </div>
 
-        <p data-reveal data-delay="150" class="text-lg md:text-xl text-gray-400 mb-10 max-w-2xl mx-auto leading-relaxed font-light">
-          Solusi pembuatan website profesional dan desain UI/UX yang memukau. 
-          Dikerjakan oleh expert, hasil rapi, dan tepat waktu.
-        </p>
+        <Transition name="fade-up" mode="out-in">
+          <p :key="t.heroSubtitle" data-reveal data-delay="150" class="text-lg md:text-xl text-gray-400 mb-10 max-w-2xl mx-auto leading-relaxed font-light">
+            {{ t.heroSubtitle }}
+          </p>
+        </Transition>
 
         <div data-reveal data-delay="300" class="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
           
           <a href="#" class="group relative inline-flex items-center justify-center gap-2 bg-white text-black px-8 py-3.5 rounded-full font-semibold transition-all duration-300 hover:scale-105 hover:shadow-[0_0_20px_rgba(255,255,255,0.3)]">
-            <span>Mulai Sekarang</span>
+            <Transition name="fade" mode="out-in"><span :key="t.heroBtnStart">{{ t.heroBtnStart }}</span></Transition>
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="group-hover:translate-x-1 transition-transform"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
           </a>
 
           <router-link to="/portofolio" class="group inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-full font-medium text-white border border-white/20 bg-white/5 backdrop-blur-sm transition-all duration-300 hover:bg-white/10 hover:border-white/40">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-400 group-hover:text-white transition-colors"><circle cx="12" cy="12" r="10"></circle><polygon points="10 8 16 12 10 16"></polygon></svg>
-            <span>Lihat Portfolio</span>
+            <Transition name="fade" mode="out-in"><span :key="t.heroBtnPort">{{ t.heroBtnPort }}</span></Transition>
           </router-link>
 
         </div>
@@ -262,13 +268,17 @@ onUnmounted(() => {
       
       <!-- Section Header -->
       <div class="text-center mb-16">
-        <span data-reveal class="inline-block px-4 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-semibold tracking-widest uppercase mb-6">
-          Layanan Kami
-        </span>
-        <h2 data-reveal data-delay="100" class="text-4xl md:text-5xl font-bold text-white mb-4 tracking-tight">
-          Apa yang Kami <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-indigo-300">Tawarkan</span>
-        </h2>
-        <p data-reveal data-delay="200" class="text-gray-400 max-w-2xl mx-auto text-lg">Solusi lengkap untuk kebutuhan digital Anda, dikerjakan oleh tim profesional.</p>
+        <Transition name="fade-up" mode="out-in">
+          <span :key="t.servicesLabel" data-reveal class="inline-block px-4 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-semibold tracking-widest uppercase mb-6">
+            {{ t.servicesLabel }}
+          </span>
+        </Transition>
+        <Transition name="fade-up" mode="out-in">
+          <h2 :key="t.servicesTitle" data-reveal data-delay="100" class="text-4xl md:text-5xl font-bold text-white mb-4 tracking-tight">
+            {{ t.servicesTitle }} <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-indigo-300">{{ t.servicesTitleHighlight }}</span>
+          </h2>
+        </Transition>
+        <Transition name="fade-up" mode="out-in"><p :key="t.servicesDesc" data-reveal data-delay="200" class="text-gray-400 max-w-2xl mx-auto text-lg">{{ t.servicesDesc }}</p></Transition>
       </div>
 
       <!-- Service Cards -->
@@ -293,9 +303,11 @@ onUnmounted(() => {
 
           <!-- Popular badge -->
           <div v-if="service.highlight" class="absolute -top-px left-1/2 -translate-x-1/2">
-            <div class="px-4 py-1 bg-indigo-500 text-white text-[10px] font-bold tracking-wider uppercase rounded-b-lg shadow-lg shadow-indigo-500/30">
-              Paling Diminati
-            </div>
+            <Transition name="fade" mode="out-in">
+              <div :key="t.badgeMostPopular" class="px-4 py-1 bg-indigo-500 text-white text-[10px] font-bold tracking-wider uppercase rounded-b-lg shadow-lg shadow-indigo-500/30">
+                {{ t.badgeMostPopular }}
+              </div>
+            </Transition>
           </div>
 
           <div class="relative z-10 flex flex-col h-full">
@@ -325,7 +337,7 @@ onUnmounted(() => {
                 ? 'bg-indigo-500 hover:bg-indigo-400 w-full justify-center py-3.5 rounded-xl text-white shadow-lg shadow-indigo-500/25 hover:shadow-indigo-400/30 hover:scale-[1.02] active:scale-[0.98]' 
                 : 'text-gray-400 hover:text-white group-hover:gap-3'"
             >
-              {{ service.highlight ? 'Order Now' : 'Learn More' }}
+              {{ service.highlight ? t.btnOrderNow : t.btnLearnMore }}
               <Icon icon="ph:arrow-right" class="transition-transform duration-300" :class="!service.highlight && 'group-hover:translate-x-1'" />
             </a>
           </div>
@@ -336,7 +348,7 @@ onUnmounted(() => {
       <div class="flex items-center gap-6 mt-28 mb-16">
         <div class="flex-1 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
         <span class="inline-block px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-gray-500 text-xs font-semibold tracking-widest uppercase">
-          Lebih Banyak
+          {{ t.featuresLabel }}
         </span>
         <div class="flex-1 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
       </div>
@@ -344,9 +356,9 @@ onUnmounted(() => {
       <!-- Section Title -->
       <div class="text-center mb-16">
         <h2 class="text-3xl md:text-4xl font-bold text-white tracking-tight">
-          Solusi Digital <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-indigo-300">Terlengkap</span>
+          {{ t.featuresTitle }} <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-indigo-300">{{ t.featuresTitleHighlight }}</span>
         </h2>
-        <p class="text-gray-400 mt-4 max-w-2xl mx-auto text-lg">Kami menyediakan segala kebutuhan digital Anda dalam satu platform terintegrasi.</p>
+        <p class="text-gray-400 mt-4 max-w-2xl mx-auto text-lg">{{ t.featuresDesc }}</p>
       </div>
 
       <!-- Feature Cards -->
@@ -372,7 +384,7 @@ onUnmounted(() => {
               <p class="text-gray-400 text-sm mb-8 leading-relaxed group-hover:text-gray-300 transition-colors">{{ feature.desc }}</p>
               
               <button class="px-5 py-2.5 rounded-xl text-xs font-bold transition-all duration-300 border bg-white/[0.03] text-gray-400 border-white/[0.08] hover:bg-indigo-500 hover:text-white hover:border-indigo-500 hover:shadow-lg hover:shadow-indigo-500/25 hover:scale-105 active:scale-95">
-                Lihat Detail
+                {{ t.btnViewDetail }}
               </button>
             </div>
           </div>
@@ -391,12 +403,12 @@ onUnmounted(() => {
         <!-- Header -->
         <div class="text-center mb-16">
           <span data-reveal class="inline-block px-4 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-semibold tracking-widest uppercase mb-6">
-            Portfolio
+            {{ t.portfolioLabel }}
           </span>
           <h2 data-reveal data-delay="100" class="text-4xl md:text-5xl font-bold text-white mb-4 tracking-tight">
-            Project <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-indigo-300">Terbaru</span>
+            {{ t.portfolioTitle }} <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-indigo-300">{{ t.portfolioTitleHighlight }}</span>
           </h2>
-          <p data-reveal data-delay="200" class="text-gray-400 max-w-2xl mx-auto text-lg">Beberapa karya terbaik yang telah kami kerjakan untuk klien kami.</p>
+          <p data-reveal data-delay="200" class="text-gray-400 max-w-2xl mx-auto text-lg">{{ t.portfolioDesc }}</p>
         </div>
 
         <!-- Loading -->
@@ -499,7 +511,9 @@ onUnmounted(() => {
             to="/portofolio" 
             class="group inline-flex items-center gap-3 px-8 py-3.5 rounded-full font-semibold text-white border border-white/15 bg-white/5 backdrop-blur-sm transition-all duration-300 hover:bg-white/10 hover:border-white/30 hover:scale-105"
           >
-            <span>Lihat Semua Portfolio</span>
+            <Transition name="fade" mode="out-in">
+              <span :key="t.btnViewAllPortfolio">{{ t.btnViewAllPortfolio }}</span>
+            </Transition>
             <Icon icon="ph:arrow-right-bold" class="text-lg group-hover:translate-x-1 transition-transform duration-300" />
           </router-link>
         </div>
@@ -518,10 +532,10 @@ onUnmounted(() => {
         <!-- Header -->
         <div class="text-center mb-16">
           <h2 data-reveal class="text-4xl md:text-5xl font-bold text-white mb-4 tracking-tight">
-            Pilih Paket <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-indigo-300">Terbaik</span>
+            {{ t.pricingTitle }} <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-indigo-300">{{ t.pricingTitleHighlight }}</span>
           </h2>
           <p data-reveal data-delay="100" class="text-gray-400 max-w-2xl mx-auto text-lg">
-            Investasi terbaik untuk kehadiran digital bisnis Anda. Semua paket termasuk domain gratis.
+            {{ t.pricingDesc }}
           </p>
         </div>
 
@@ -547,7 +561,7 @@ onUnmounted(() => {
             <div v-if="plan.is_popular" class="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-500"></div>
             <div v-if="plan.is_popular" class="absolute top-4 right-4">
               <span class="px-3 py-1 rounded-full bg-indigo-500 text-white text-[10px] font-bold uppercase tracking-wider shadow-lg shadow-indigo-500/25 flex items-center gap-1">
-                <Icon icon="ph:star-fill" /> Paling Laris
+                <Icon icon="ph:star-fill" /> {{ t.badgeBestSeller }}
               </span>
             </div>
 
@@ -583,7 +597,7 @@ onUnmounted(() => {
                   ? 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-600/25' 
                   : 'bg-white text-black hover:bg-gray-200'"
               >
-                <span>Pilih Paket</span>
+                <span>{{ t.btnSelectPlan }}</span>
                 <Icon icon="ph:arrow-right-bold" />
               </a>
 
@@ -593,7 +607,7 @@ onUnmounted(() => {
       </div>
     </section>
      
-    <TeamMembers :members="teamMembers" />
+    <TeamMembers :members="teamMembers" :title="tTeam.title" />
 
     <!-- ═══════════════════════════════════════════ -->
     <!-- SECTION: TESTIMONIALS                       -->
@@ -605,12 +619,16 @@ onUnmounted(() => {
       <div class="relative z-10">
         <!-- Header -->
         <div class="text-center mb-16 px-6">
-          <span data-reveal class="inline-block px-4 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-semibold tracking-widest uppercase mb-6">
-            Testimoni
-          </span>
-          <h2 data-reveal data-delay="100" class="text-3xl md:text-5xl font-bold text-white mb-4 tracking-tight">
-            Apa Kata <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-indigo-300">Mereka?</span>
-          </h2>
+          <Transition name="fade" mode="out-in">
+            <span :key="t.testimonialLabel" data-reveal class="inline-block px-4 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-semibold tracking-widest uppercase mb-6">
+              {{ t.testimonialLabel }}
+            </span>
+          </Transition>
+          <Transition name="fade-up" mode="out-in">
+            <h2 :key="t.testimonialTitle" data-reveal data-delay="100" class="text-3xl md:text-5xl font-bold text-white mb-4 tracking-tight">
+              {{ t.testimonialTitle }} <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-indigo-300">{{ t.testimonialHighlight }}</span>
+            </h2>
+          </Transition>
         </div>
 
         <!-- Case 1: Less than 5 items (Display Grid/Flex) -->
@@ -675,16 +693,15 @@ onUnmounted(() => {
 
         <!-- Headline -->
         <h2 data-reveal class="text-4xl md:text-6xl font-bold text-white mb-6 tracking-tight">
-          Punya Project? <br class="hidden md:block" />
+          {{ t.contactTitle }} <br class="hidden md:block" />
           <span class="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-300">
-            Yuk Diskusi!
+            {{ t.contactTitleHighlight }}
           </span>
         </h2>
 
         <!-- Description -->
         <p class="text-gray-400 text-lg md:text-xl max-w-2xl mx-auto mb-12 leading-relaxed">
-          Konsultasikan kebutuhan project Anda langsung melalui WhatsApp. Respon cepat, 
-          tanpa ribet, dan tentunya <strong class="text-white">gratis</strong>.
+          {{ t.contactDesc }}
         </p>
 
         <!-- WhatsApp Button -->
@@ -695,7 +712,7 @@ onUnmounted(() => {
             class="group relative inline-flex items-center gap-3 bg-green-500 hover:bg-green-400 text-white px-10 py-4 rounded-full font-bold text-lg transition-all duration-300 hover:scale-105 hover:shadow-[0_0_40px_rgba(34,197,94,0.3)] active:scale-95"
           >
             <Icon icon="ic:baseline-whatsapp" class="text-2xl group-hover:rotate-12 transition-transform duration-300" />
-            <span>Chat via WhatsApp</span>
+            <span>{{ t.contactBtn }}</span>
             <Icon icon="ph:arrow-right-bold" class="text-lg group-hover:translate-x-1 transition-transform duration-300" />
           </a>
         </div>
@@ -704,15 +721,15 @@ onUnmounted(() => {
         <div class="flex flex-wrap items-center justify-center gap-8 mt-12 text-sm text-gray-500">
           <div class="flex items-center gap-2">
             <Icon icon="ph:clock-bold" class="text-green-400" />
-            <span>Respon &lt; 5 menit</span>
+            <span>{{ t.trustResponse }}</span>
           </div>
           <div class="flex items-center gap-2">
             <Icon icon="ph:shield-check-bold" class="text-green-400" />
-            <span>Konsultasi gratis</span>
+            <span>{{ t.trustFree }}</span>
           </div>
           <div class="flex items-center gap-2">
             <Icon icon="ph:handshake-bold" class="text-green-400" />
-            <span>Tanpa komitmen</span>
+            <span>{{ t.trustNoCommit }}</span>
           </div>
         </div>
       </div>

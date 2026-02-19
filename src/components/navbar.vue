@@ -1,7 +1,9 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue';
 import { Icon } from '@iconify/vue';
-
+import { useLanguage } from '../composables/useLanguage';
+const { lang, toggleLang, useT } = useLanguage();
+const t = useT('navbar');
 const isMenuOpen = ref(false);
 const isScrolled = ref(false);
 
@@ -29,16 +31,13 @@ const handleScroll = () => {
 
 const navigateTo = (path) => {
   closeMenu();
-  // Check if it's a hash link on the same page
   if (path.startsWith('/#')) {
     const hash = path.substring(1);
     const currentPath = window.location.pathname;
     if (currentPath === '/') {
-      // Same page, just scroll to section
       const el = document.querySelector(hash);
       if (el) el.scrollIntoView({ behavior: 'smooth' });
     } else {
-      // Navigate to home + hash
       window.location.href = path;
     }
   }
@@ -122,11 +121,27 @@ onUnmounted(() => {
             :class="isScrolled ? 'py-2 px-4 lg:px-5 text-xs lg:text-sm' : 'py-2.5 px-5 lg:px-6 text-sm'"
           >
             <Icon icon="ic:baseline-whatsapp" class="text-lg" />
-            <span class="hidden lg:inline">Konsultasi Gratis</span>
-            <span class="lg:hidden">Chat</span>
+            <Transition name="fade" mode="out-in">
+              <span :key="t.cta" class="hidden lg:inline">{{ t.cta }}</span>
+            </Transition>
+            <Transition name="fade" mode="out-in">
+              <span :key="t.ctaShort" class="lg:hidden">{{ t.ctaShort }}</span>
+            </Transition>
             <Icon icon="ph:arrow-right-bold" class="text-xs group-hover:translate-x-0.5 transition-transform duration-300" />
           </a>
+
+          <button 
+            @click="toggleLang" 
+            class="flex items-center gap-2 px-3 py-2 rounded-full border border-white/10 hover:bg-white/10 transition-all text-sm font-bold text-white ml-4"
+          >
+            <Icon icon="ph:globe" class="text-lg" />
+            <Transition name="fade" mode="out-in">
+              <span :key="lang">{{ lang === 'id' ? 'ID' : 'EN' }}</span>
+            </Transition>
+          </button>
+
         </div>
+
 
         <!-- Mobile Hamburger -->
         <div class="flex items-center md:hidden">
@@ -187,6 +202,15 @@ onUnmounted(() => {
             </a>
           </template>
           
+          <!-- Mobile Language Toggle -->
+          <button 
+            @click="toggleLang" 
+            class="flex items-center gap-3 w-full text-gray-300 hover:text-white hover:bg-white/[0.06] px-4 py-3 rounded-xl text-base font-medium transition-all duration-300 border border-transparent hover:border-white/[0.08]"
+          >
+            <Icon icon="ph:globe" class="text-lg" />
+            <span>{{ lang === 'id' ? '🇮🇩 Bahasa Indonesia' : '🇬🇧 English' }}</span>
+          </button>
+
           <!-- Mobile CTA -->
           <div class="pt-3 mt-2 border-t border-white/[0.06]">
             <a 
@@ -196,7 +220,9 @@ onUnmounted(() => {
               class="flex items-center justify-center gap-3 bg-green-500 hover:bg-green-400 text-white w-full px-6 py-3.5 rounded-xl font-bold text-sm transition-all duration-300 hover:shadow-lg hover:shadow-green-500/20 active:scale-95"
             >
               <Icon icon="ic:baseline-whatsapp" class="text-xl" />
-              <span>Chat via WhatsApp</span>
+              <Transition name="fade" mode="out-in">
+                <span :key="t.mobileCta">{{ t.mobileCta }}</span>
+              </Transition>
               <Icon icon="ph:arrow-right-bold" class="text-sm" />
             </a>
           </div>

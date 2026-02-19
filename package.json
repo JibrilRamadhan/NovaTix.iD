@@ -12,6 +12,7 @@
     "@iconify/vue": "^5.0.0",
     "@supabase/supabase-js": "^2.95.3",
     "@tailwindcss/vite": "^4.1.18",
+    "@vueuse/head": "^2.0.0",
     "chart.js": "^4.5.1",
     "motion-v": "^1.10.3",
     "tailwindcss": "^4.1.18",
